@@ -43,7 +43,10 @@ Coming soon!
 1. **Select only the data rows**, not the entire tabular environment
 2. **Works with mixed content**: numbers, strings, LaTeX commands
 3. **Preserves existing formatting**: Won't duplicate `\textbf{}` or `\underline{}` commands
-4. **Handles edge cases**: empty cells, negative numbers, decimals
+
+## Known Issues
+
+1. **Can not handle edge cases**: empty cells, \infty...
 
 ## Development
 
