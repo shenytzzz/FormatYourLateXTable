@@ -1,0 +1,69 @@
+% LaTeX Table Formatting Test Cases
+
+% Test Case 1: Basic formatting with mixed content
+\begin{tabular}{|c|c|c|c|}
+\hline
+Method & Conference & Accuracy & F1-Score \\
+\hline
+  Baseline~\cite{base2021} &   NeurIPS 2021 &   85.3 &   0.842 \\
+                Our Method &      CVPR 2022 &   89.7 &   0.891 \\
+          Enhanced Version &      ICCV 2023 &   91.2 &   0.908 \\
+\hline
+\end{tabular}
+
+% Test Case 2: Complex LaTeX commands and formatting
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Approach} & \color{blue}Dataset & \cellcolor{gray!20}{mAP} & Note \\
+\hline
+YOLOv5~\cite{yolov5} & COCO & 56.8 & Standard \\
+\textbf{Our Method} & COCO & 62.3 & Improved \\
+\underline{Variant A} & COCO & 61.1 & Ablation \\
+\hline
+\end{tabular}
+
+% Test Case 3: Numeric data with emphasis testing
+\begin{tabular}{|c|c|c|c|}
+\hline
+Model & Loss & Accuracy & Time (s) \\
+\hline
+ResNet-50 & 0.2341 & 92.34 & 15.7 \\
+EfficientNet & 0.1987 & 94.56 & 12.3 \\
+Vision Transformer & 0.1567 & 96.78 & 18.9 \\
+MobileNet & 0.2654 & 89.12 & 8.4 \\
+\hline
+\end{tabular}
+
+% Test Case 4: Mixed data types (string and numeric columns)
+\begin{tabular}{|l|c|c|c|l|}
+\hline
+Algorithm & Speed & Memory & Accuracy & Status \\
+\hline
+QuickSort & O(n log n) & O(log n) & 100 & \textcolor{green}{Optimal} \\
+MergeSort & O(n log n) & O(n) & 100 & \textcolor{blue}{Stable} \\
+BubbleSort & O(n²) & O(1) & 85 & \textcolor{red}{Slow} \\
+\hline
+\end{tabular}
+
+% Test Case 5: Edge cases with empty cells and special characters
+\begin{tabular}{|c|c|c|c|}
+\hline
+Test & Value & Result & Status \\
+\hline
+Test-1 &  & 0.956 & Pass \\
+Test-2 & NaN &  & Fail \\
+Test-3 & ∞ & 1.000 & Warning \\
+Test-4 & -0.001 & 0.999 & Pass \\
+\hline
+\end{tabular}
+
+% Test Case 6: Long text and citations
+\begin{tabular}{|p{3cm}|c|c|c|}
+\hline
+Method Name & Performance & Citation Count & Year \\
+\hline
+A Novel Approach to Deep Learning & 94.2 & 150 & 2023 \\
+Transformer-Based Architecture~\cite{transformer2017} & 96.8 & 12000 & 2022 \\
+Attention Mechanisms in Computer Vision~\cite{attention2020} & 92.1 & 850 & 2021 \\
+\hline
+\end{tabular}

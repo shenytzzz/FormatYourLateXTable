@@ -1,0 +1,66 @@
+{
+  "name": "format-your-latex-table",
+  "displayName": "Format Your LaTeX Table",
+  "description": "一键格式化论文中的 LaTeX 表格数据部分，支持自动对齐、列宽自适应和数值强调",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Formatters",
+    "Other"
+  ],
+  "keywords": [
+    "latex",
+    "table",
+    "format",
+    "alignment"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/format-your-latex-table"
+  },
+  "activationEvents": [
+    "onCommand:format-your-latex-table.formatTable"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.60.0",
+    "@types/node": "16.x",
+    "typescript": "^4.9.4"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "format-your-latex-table.formatTable",
+        "title": "Format LaTeX Table",
+        "category": "LaTeX"
+      },
+      {
+        "command": "format-your-latex-table.formatTableWithBoldMaxima",
+        "title": "Format LaTeX Table (Bold Maxima)",
+        "category": "LaTeX"
+      },
+      {
+        "command": "format-your-latex-table.formatTableWithUnderlineSecondMaxima",
+        "title": "Format LaTeX Table (Underline Second Maxima)",
+        "category": "LaTeX"
+      },
+      {
+        "command": "format-your-latex-table.formatTableWithBoldMinima",
+        "title": "Format LaTeX Table (Bold Minima)",
+        "category": "LaTeX"
+      },
+      {
+        "command": "format-your-latex-table.formatTableWithUnderlineSecondMinima",
+        "title": "Format LaTeX Table (Underline Second Minima)",
+        "category": "LaTeX"
+      }
+    ]
+  }
+}
