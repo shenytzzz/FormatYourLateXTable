@@ -2,7 +2,7 @@
   "name": "format-your-latex-table",
   "displayName": "Format Your LaTeX Table",
   "description": "一键格式化论文中的 LaTeX 表格数据部分，支持自动对齐、列宽自适应和数值强调",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "engines": {
     "vscode": "^1.60.0"
   },

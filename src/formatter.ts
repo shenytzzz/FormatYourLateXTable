@@ -32,31 +32,36 @@ export function formatLatexTable(options: FormatOptions) {
     }
 }
 
+interface ParsedTableRow {
+    lineIndex: number;
+    cells: string[];
+}
+
 function formatTableText(text: string, options: FormatOptions): string {
-    const lines = text.split('\n').filter(line => line.trim());
-    const tableData: string[][] = [];
+    const lines = text.split('\n');
+    const tableRows: ParsedTableRow[] = [];
     
-    for (const line of lines) {
-        const cells = line.split('&').map(cell => cell.trim());
-        const lastCell = cells[cells.length - 1];
-        if (lastCell.includes('\\\\')) {
-            cells[cells.length - 1] = lastCell.replace('\\\\', '').trim();
+    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+        const cells = parseTableRow(lines[lineIndex]);
+        if (cells) {
+            tableRows.push({ lineIndex, cells });
         }
-        tableData.push(cells);
     }
 
-    if (tableData.length === 0) {
+    if (tableRows.length === 0) {
         return text;
     }
 
-    const numCols = tableData[0].length;
+    const tableData = tableRows.map(row => row.cells);
+    const numCols = Math.max(...tableData.map(row => row.length));
+    const normalizedData = tableData.map(row => normalizeRow(row, numCols));
     
     // Calculate lengths for each column
     const lengths: number[][] = [];
     for (let col = 0; col < numCols; col++) {
         lengths[col] = [];
-        for (let row = 0; row < tableData.length; row++) {
-            lengths[col][row] = calculateLength(tableData[row][col]);
+        for (let row = 0; row < normalizedData.length; row++) {
+            lengths[col][row] = calculateLength(normalizedData[row][col]);
         }
     }
 
@@ -68,7 +73,7 @@ function formatTableText(text: string, options: FormatOptions): string {
     }
 
     // Apply emphasis formatting
-    const processedData = applyEmphasisFormatting(tableData, options);
+    const processedData = applyEmphasisFormatting(normalizedData, options);
 
     // Calculate final column widths considering both original and formatted content
     const finalColumnWidths: number[] = [];
@@ -81,7 +86,7 @@ function formatTableText(text: string, options: FormatOptions): string {
     }
 
     // Format each cell with proper alignment
-    const formattedLines: string[] = [];
+    const formattedRows: string[] = [];
     for (let row = 0; row < processedData.length; row++) {
         const formattedCells: string[] = [];
         for (let col = 0; col < numCols; col++) {
@@ -91,10 +96,30 @@ function formatTableText(text: string, options: FormatOptions): string {
             const formattedCell = ' '.repeat(padding) + cell;
             formattedCells.push(formattedCell);
         }
-        formattedLines.push(formattedCells.join(' & ') + ' \\\\');
+        formattedRows.push(formattedCells.join(' & ') + ' \\\\');
+    }
+
+    const formattedLines = [...lines];
+    for (let row = 0; row < tableRows.length; row++) {
+        formattedLines[tableRows[row].lineIndex] = formattedRows[row];
     }
 
     return formattedLines.join('\n');
+}
+
+function parseTableRow(line: string): string[] | null {
+    if (!line.includes('&') || line.trim().startsWith('%')) {
+        return null;
+    }
+
+    const cells = line.split('&').map(cell => cell.trim());
+    const lastCell = cells[cells.length - 1];
+    cells[cells.length - 1] = lastCell.replace(/\s*\\\\(?:\s*\[[^\]]*\])?\s*(?:%.*)?$/, '').trim();
+    return cells.length > 1 ? cells : null;
+}
+
+function normalizeRow(row: string[], numCols: number): string[] {
+    return Array.from({ length: numCols }, (_, col) => row[col] ?? '');
 }
 
 function calculateLength(text: string): number {
@@ -173,10 +198,35 @@ function getNthDistinctValue(values: number[], index: number, direction: 'asc' |
 
 function extractNumericValue(text: string): number | null {
     const cleanText = stripLatexFormattingForNumericValue(text);
+
+    if (isMissingValue(cleanText)) {
+        return null;
+    }
+
+    const infinityValue = parseInfinity(cleanText);
+    if (infinityValue !== null) {
+        return infinityValue;
+    }
     
     // Only match if the entire string is numeric (with optional sign and decimal)
     const match = cleanText.match(/^(-?\d+\.?\d*)$/);
     return match ? parseFloat(match[0]) : null;
+}
+
+function isMissingValue(text: string): boolean {
+    return text === '' || /^(-+|n\/a|nan|null)$/i.test(text);
+}
+
+function parseInfinity(text: string): number | null {
+    const normalized = text.replace(/\s+/g, '');
+    if (/^(?:\+)?(?:\\infty|∞|inf|infinity)$/i.test(normalized)) {
+        return Infinity;
+    }
+    if (/^-(?:\\infty|∞|inf|infinity)$/i.test(normalized)) {
+        return -Infinity;
+    }
+
+    return null;
 }
 
 function stripLatexFormattingForNumericValue(text: string): string {

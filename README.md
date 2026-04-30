@@ -8,7 +8,9 @@ A VS Code extension that formats LaTeX table rows with one click. It aligns cell
 - **Automatic alignment**: Right-aligns cells with adaptive column widths
 - **Numeric emphasis**: Bold maxima/minima or underline second maxima/minima
 - **Mixed-column support**: Ignores non-numeric cells when finding numeric values
+- **Full table selections**: Preserves `\begin{tabular}`, `\hline`, `\end{tabular}`, blank lines, and comments while formatting table rows
 - **LaTeX-aware output**: Preserves existing wrappers such as `\textbf{}`, `\underline{}`, `\color{}`, `\textcolor{}`, and `\cellcolor{}`
+- **Symbolic numeric support**: Treats `\infty`, `-\infty`, and `∞` as numeric values for emphasis
 - **Safe command activation**: All contributed commands can activate the extension directly
 
 ## Installation
@@ -25,14 +27,14 @@ Coming soon!
 You can also install a local VSIX from the command line:
 
 ```bash
-code --install-extension format-your-latex-table-1.0.1.vsix
+code --install-extension format-your-latex-table-*.vsix
 ```
 
 ## Usage
 
 ### Basic Formatting
 
-1. **Select** your LaTeX table data (exclude headers like `\hline` or `\end{tabular}`)
+1. **Select** your LaTeX table rows or the full `tabular` environment
 2. **Press** `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
 3. **Type** "Format LaTeX Table" and select the basic option
 
@@ -66,15 +68,11 @@ Running `Format LaTeX Table (Bold Minima)` keeps the color command while adding 
 
 ## Tips
 
-1. **Select only the data rows**, not the entire tabular environment
-2. **Works with mixed content**: numbers, strings, LaTeX commands
+1. **Full `tabular` selections are supported**: non-row lines are preserved in place
+2. **Works with mixed content**: numbers, strings, LaTeX commands, empty cells, and missing values
 3. **Preserves existing formatting**: Won't duplicate `\textbf{}` or `\underline{}` commands
-4. **Second maxima/minima are distinct**: duplicate best values do not count as second-best values
-
-## Known Issues
-
-1. Empty cells and symbolic values such as `\infty`, `NaN`, or `--` are ignored for numeric emphasis.
-2. The formatter is intended for selected table rows, not a full `tabular` environment.
+4. **Missing values are skipped**: empty cells, `NaN`, `--`, and `N/A` do not affect numeric emphasis
+5. **Second maxima/minima are distinct**: duplicate best values do not count as second-best values
 
 ## Development
 
@@ -99,6 +97,11 @@ vsce package
 Open this project in VS Code and press `F5` to launch an Extension Development Host. Select LaTeX table rows in the new window, then run one of the commands from the Command Palette.
 
 ## Changelog
+
+### v1.0.2
+- Added support for formatting a full selected `tabular` environment
+- Added numeric comparison support for `\infty`, `-\infty`, and `∞`
+- Empty cells and missing values such as `NaN`, `--`, and `N/A` are skipped safely
 
 ### v1.0.1
 - Fixed command activation for all emphasis commands
