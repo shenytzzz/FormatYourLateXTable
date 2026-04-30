@@ -1,15 +1,15 @@
 # Format Your LaTeX Table
 
-A VS Code extension that formats LaTeX table data with one click. Features automatic alignment, adaptive column widths, and optional emphasis on numeric values (maxima/minima).
+A VS Code extension that formats LaTeX table rows with one click. It aligns cells, keeps LaTeX table syntax tidy, and can optionally highlight numeric maxima/minima.
 
 ## Features
 
-- **One-click formatting**: Select LaTeX table data and format it instantly
-- **Automatic alignment**: Right-aligns all cells with proper spacing
-- **Smart emphasis options**: Optional bold/underline for maxima, minima, and second-order values
-- **LaTeX-aware**: Handles LaTeX commands like `\textbf{}`, `\color{}`, `\cellcolor{}`, etc.
-- **String detection**: Automatically skips string columns for emphasis formatting
-- **Adaptive column widths**
+- **One-click formatting**: Select LaTeX table rows and format them instantly
+- **Automatic alignment**: Right-aligns cells with adaptive column widths
+- **Numeric emphasis**: Bold maxima/minima or underline second maxima/minima
+- **Mixed-column support**: Ignores non-numeric cells when finding numeric values
+- **LaTeX-aware output**: Preserves existing wrappers such as `\textbf{}`, `\underline{}`, `\color{}`, `\textcolor{}`, and `\cellcolor{}`
+- **Safe command activation**: All contributed commands can activate the extension directly
 
 ## Installation
 
@@ -17,10 +17,16 @@ A VS Code extension that formats LaTeX table data with one click. Features autom
 Coming soon!
 
 ### Manual Installation
-1. Download the latest `.vsix` file from the [releases page](https://github.com/your-username/format-your-latex-table/releases)
+1. Download the latest `.vsix` file from the [releases page](https://github.com/shenytzzz/FormatYourLateXTable/releases)
 2. In VS Code, press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
 3. Type "Extensions: Install from VSIX..."
 4. Select the downloaded `.vsix` file
+
+You can also install a local VSIX from the command line:
+
+```bash
+code --install-extension format-your-latex-table-1.0.1.vsix
+```
 
 ## Usage
 
@@ -38,27 +44,67 @@ Coming soon!
 | `Format LaTeX Table (Bold Minima)` | Format + bold minimum values |
 | `Format LaTeX Table (Underline Second Minima)` | Format + underline second minimum values |
 
+### Example
+
+Input:
+
+```latex
+ResNet-50 & 0.2341 & 92.34 & 15.7 \\
+EfficientNet & 0.1987 & 94.56 & 12.3 \\
+Vision Transformer & 0.1567 & 96.78 & 18.9 \\
+MobileNet & 0.2654 & 89.12 & {\color{blue} 8.4} \\
+```
+
+Running `Format LaTeX Table (Bold Minima)` keeps the color command while adding bold formatting:
+
+```latex
+           ResNet-50 &            0.2341 &            92.34 &                          15.7 \\
+        EfficientNet &            0.1987 &            94.56 &                          12.3 \\
+  Vision Transformer &   \textbf{0.1567} &            96.78 &                          18.9 \\
+           MobileNet &            0.2654 &   \textbf{89.12} &   \textbf{{\color{blue} 8.4}} \\
+```
+
 ## Tips
 
 1. **Select only the data rows**, not the entire tabular environment
 2. **Works with mixed content**: numbers, strings, LaTeX commands
 3. **Preserves existing formatting**: Won't duplicate `\textbf{}` or `\underline{}` commands
+4. **Second maxima/minima are distinct**: duplicate best values do not count as second-best values
 
 ## Known Issues
 
-1. **Can not handle edge cases**: empty cells, \infty...
+1. Empty cells and symbolic values such as `\infty`, `NaN`, or `--` are ignored for numeric emphasis.
+2. The formatter is intended for selected table rows, not a full `tabular` environment.
 
 ## Development
 
 ### Building from Source
 ```bash
-git clone https://github.com/your-username/format-your-latex-table.git
-cd format-your-latex-table
+git clone https://github.com/shenytzzz/FormatYourLateXTable.git
+cd FormatYourLateXTable
 npm install
 npm run compile
 ```
 
+### Package a VSIX
+
+```bash
+npm install -g @vscode/vsce
+npm run compile
+vsce package
+```
+
+### Test in VS Code
+
+Open this project in VS Code and press `F5` to launch an Extension Development Host. Select LaTeX table rows in the new window, then run one of the commands from the Command Palette.
+
 ## Changelog
+
+### v1.0.1
+- Fixed command activation for all emphasis commands
+- Fixed emphasis logic for mixed text/numeric selections
+- Preserved LaTeX color formatting when adding bold or underline
+- Used distinct values for second maxima/minima
 
 ### v1.0.0
 - Initial release
