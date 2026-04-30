@@ -21,7 +21,11 @@
     "url": "https://github.com/your-username/format-your-latex-table"
   },
   "activationEvents": [
-    "onCommand:format-your-latex-table.formatTable"
+    "onCommand:format-your-latex-table.formatTable",
+    "onCommand:format-your-latex-table.formatTableWithBoldMaxima",
+    "onCommand:format-your-latex-table.formatTableWithUnderlineSecondMaxima",
+    "onCommand:format-your-latex-table.formatTableWithBoldMinima",
+    "onCommand:format-your-latex-table.formatTableWithUnderlineSecondMinima"
   ],
   "main": "./out/extension.js",
   "scripts": {
