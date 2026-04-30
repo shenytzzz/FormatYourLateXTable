@@ -107,60 +107,57 @@ function applyEmphasisFormatting(data: string[][], options: FormatOptions): stri
     const numCols = data[0].length;
     
     for (let col = 0; col < numCols; col++) {
-        // Check if column contains numeric data
-        const isNumericColumn = data.every(row => {
-            const cleanText = extractNumericValue(row[col]);
-            return cleanText !== null;
-        });
-        
-        if (!isNumericColumn) {
+        const numericCells = data
+            .map((row, rowIndex) => ({
+                rowIndex,
+                value: extractNumericValue(row[col])
+            }))
+            .filter((cell): cell is { rowIndex: number; value: number } => cell.value !== null);
+
+        if (numericCells.length === 0) {
             continue;
         }
-        
-        const numericValues: number[] = [];
-        for (let row = 0; row < data.length; row++) {
-            const value = extractNumericValue(data[row][col]);
-            numericValues.push(value!);
-        }
-        
+
         // Apply bold to maxima
         if (options.boldMaxima) {
-            const maxima = Math.max(...numericValues);
-            for (let row = 0; row < data.length; row++) {
-                if (numericValues[row] === maxima) {
-                    result[row][col] = wrapWithLatexCommand(result[row][col], 'textbf');
+            const maxima = Math.max(...numericCells.map(cell => cell.value));
+            for (const cell of numericCells) {
+                if (cell.value === maxima) {
+                    result[cell.rowIndex][col] = wrapWithLatexCommand(result[cell.rowIndex][col], 'textbf');
                 }
             }
         }
         
         // Apply bold to minima
         if (options.boldMinima) {
-            const minima = Math.min(...numericValues);
-            for (let row = 0; row < data.length; row++) {
-                if (numericValues[row] === minima) {
-                    result[row][col] = wrapWithLatexCommand(result[row][col], 'textbf');
+            const minima = Math.min(...numericCells.map(cell => cell.value));
+            for (const cell of numericCells) {
+                if (cell.value === minima) {
+                    result[cell.rowIndex][col] = wrapWithLatexCommand(result[cell.rowIndex][col], 'textbf');
                 }
             }
         }
         
         // Apply underline to second maxima
         if (options.underlineSecondMaxima) {
-            const sorted = [...numericValues].sort((a, b) => b - a);
-            const secondMaxima = sorted[1];
-            for (let row = 0; row < data.length; row++) {
-                if (numericValues[row] === secondMaxima) {
-                    result[row][col] = wrapWithLatexCommand(result[row][col], 'underline');
+            const secondMaxima = getNthDistinctValue(numericCells.map(cell => cell.value), 1, 'desc');
+            if (secondMaxima !== null) {
+                for (const cell of numericCells) {
+                    if (cell.value === secondMaxima) {
+                        result[cell.rowIndex][col] = wrapWithLatexCommand(result[cell.rowIndex][col], 'underline');
+                    }
                 }
             }
         }
         
         // Apply underline to second minima
         if (options.underlineSecondMinima) {
-            const sorted = [...numericValues].sort((a, b) => a - b);
-            const secondMinima = sorted[1];
-            for (let row = 0; row < data.length; row++) {
-                if (numericValues[row] === secondMinima) {
-                    result[row][col] = wrapWithLatexCommand(result[row][col], 'underline');
+            const secondMinima = getNthDistinctValue(numericCells.map(cell => cell.value), 1, 'asc');
+            if (secondMinima !== null) {
+                for (const cell of numericCells) {
+                    if (cell.value === secondMinima) {
+                        result[cell.rowIndex][col] = wrapWithLatexCommand(result[cell.rowIndex][col], 'underline');
+                    }
                 }
             }
         }
@@ -169,19 +166,26 @@ function applyEmphasisFormatting(data: string[][], options: FormatOptions): stri
     return result;
 }
 
+function getNthDistinctValue(values: number[], index: number, direction: 'asc' | 'desc'): number | null {
+    const sorted = [...new Set(values)].sort((a, b) => direction === 'asc' ? a - b : b - a);
+    return sorted[index] ?? null;
+}
+
 function extractNumericValue(text: string): number | null {
-    // Extract numeric value from text, handling LaTeX formatting
-    const cleanText = text.replace(/\\textbf\{([^}]*)\}/g, '$1')
-                         .replace(/\\underline\{([^}]*)\}/g, '$1')
-                         .replace(/\\color\{[^}]*\}\{([^}]*)\}/g, '$1')
-                         .replace(/\\[a-zA-Z]+\{[^}]*\}/g, '')
-                         .replace(/\\[a-zA-Z]+/g, '')
-                         .replace(/\{([^}]*)\}/g, '$1')  // Remove curly braces
-                         .trim();
+    const cleanText = stripLatexFormattingForNumericValue(text);
     
     // Only match if the entire string is numeric (with optional sign and decimal)
     const match = cleanText.match(/^(-?\d+\.?\d*)$/);
     return match ? parseFloat(match[0]) : null;
+}
+
+function stripLatexFormattingForNumericValue(text: string): string {
+    return text
+        .replace(/\\(?:textbf|underline|emph|mathbf|mathrm)\s*\{/g, '{')
+        .replace(/\\(?:textcolor|colorbox)\s*\{[^{}]*\}\s*\{/g, '{')
+        .replace(/\\(?:color|cellcolor)\s*\{[^{}]*\}\s*/g, '')
+        .replace(/[{}]/g, '')
+        .trim();
 }
 
 function wrapWithLatexCommand(text: string, command: string): string {
@@ -190,22 +194,5 @@ function wrapWithLatexCommand(text: string, command: string): string {
         return text;
     }
     
-    // Extract the actual content to wrap
-    const content = extractContentForWrapping(text);
-    return `\\${command}{${content}}`;
-}
-
-function extractContentForWrapping(text: string): string {
-    // Remove existing LaTeX commands to get the raw content
-    return text.replace(/\\textbf\{([^}]*)\}/g, '$1')
-               .replace(/\\underline\{([^}]*)\}/g, '$1')
-               .replace(/\\color\{[^}]*\}\{([^}]*)\}/g, '$1')
-               .replace(/\\cellcolor\{[^}]*\}\{([^}]*)\}/g, '$1')
-               .replace(/\\cite\{[^}]*\}/g, '')
-               .replace(/\\ref\{[^}]*\}/g, '')
-               .replace(/\\label\{[^}]*\}/g, '')
-               .replace(/\\[a-zA-Z]+\{[^}]*\}/g, '')
-               .replace(/\\[a-zA-Z]+/g, '')
-               .replace(/\{([^}]*)\}/g, '$1')  // Remove curly braces
-               .trim();
+    return `\\${command}{${text.trim()}}`;
 }
